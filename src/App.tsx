@@ -62,7 +62,7 @@ function ImmersiveStory() {
 
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start start", "end start"]
+    offset: ["start start", "end end"]
   });
 
   const smoothProgress = useSpring(scrollYProgress, {
@@ -199,8 +199,8 @@ function HorizontalGallery() {
     }
   });
 
-  // x translates the gallery horizontally. "-80%" creates a smooth end stop.
-  const x = useTransform(smoothProgress, [0, 1], ["0%", "-80%"]); 
+  // x translates the gallery horizontally. "calc(-100% + 100vw)" ensures we slide exactly to the last image.
+  const x = useTransform(smoothProgress, [0, 1], ["0%", "calc(-100% + 100vw)"]); 
 
   // Background parallax layers
   const prlxBg1 = useTransform(smoothProgress, [0, 1], ["-20vh", "30vh"]);
@@ -396,51 +396,75 @@ function FeedNelloGame() {
   };
 
   return (
-    <section className="bg-amber-500 py-32 px-6 flex flex-col items-center justify-center relative overflow-hidden z-30">
-      <h2 className="text-4xl md:text-[6rem] leading-none font-black text-stone-900 mb-16 tracking-tighter text-center">
-        L'Ora della Pappina
-      </h2>
-      
-      <div className="relative">
-         <motion.div
-           animate={isEating ? { scale: [1, 1.2, 0.9, 1.1, 1], rotate: [0, -10, 10, -5, 0], y: [0, -20, 0] } : { y: [0, -10, 0] }}
-           transition={{ duration: isEating ? 1 : 4, repeat: isEating ? 0 : Infinity }}
-           className="w-64 h-64 md:w-80 md:h-80 rounded-full border-8 border-stone-900 bg-stone-100 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] z-10 relative flex justify-center items-center"
-         >
-           <img src="/n.png" className="w-[120%] h-[120%] object-cover scale-[1.3] translate-y-8" alt="Nello attende la pappina" />
-         </motion.div>
-         
-         {isEating && (
-            <motion.div
-              initial={{ opacity: 0, y: 0, scale: 0.5 }}
-              animate={{ opacity: [0, 1, 0], y: -100, scale: 1.5 }}
-              transition={{ duration: 1 }}
-              className="absolute top-0 left-1/2 -translate-x-1/2 text-6xl drop-shadow-lg z-20"
-            >
-              ❤️
-            </motion.div>
-         )}
+    <section className="bg-stone-950 py-32 px-6 flex flex-col items-center justify-center relative overflow-hidden z-30 font-sans">
+      {/* Modern abstract glowing background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-[50vw] h-[50vw] bg-amber-500/10 rounded-full blur-[100px] mix-blend-screen animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-[40vw] h-[40vw] bg-orange-600/10 rounded-full blur-[120px] mix-blend-screen" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)]"></div>
       </div>
 
-      <div className="mt-16 text-center relative z-20">
-        <p className="text-2xl md:text-3xl font-black text-stone-900 mb-8 uppercase tracking-widest">
-          Pappine date: {feeds}
-        </p>
-        <button 
-          onClick={handleFeed}
-          disabled={isEating}
-          className="bg-stone-900 text-amber-500 hover:bg-stone-800 disabled:opacity-80 px-8 py-5 rounded-full font-black text-xl md:text-2xl transition-all shadow-2xl hover:scale-105 active:scale-95 flex items-center justify-center gap-4 mx-auto cursor-pointer"
+      <div className="relative z-10 w-full max-w-5xl flex flex-col items-center">
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-12 md:mb-16"
         >
-          <Bone className={`w-8 h-8 ${isEating ? 'animate-bounce' : ''}`} />
-          Dai la Pappina!
-        </button>
-      </div>
+           <h2 className="text-4xl md:text-[5rem] leading-[1.1] font-black text-transparent bg-clip-text bg-gradient-to-br from-stone-100 to-stone-500 tracking-tighter mb-4">
+              Interactive <br className="md:hidden" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Pappina Experience</span>
+           </h2>
+           <p className="text-stone-400 text-lg md:text-xl font-medium tracking-wide">
+             Nutrire l'ego (e lo stomaco) del re.
+           </p>
+        </motion.div>
+        
+        <motion.div 
+           className="relative backdrop-blur-2xl bg-white/5 border border-white/10 p-8 md:p-12 rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col items-center w-full max-w-lg"
+           initial={{ opacity: 0, scale: 0.95 }}
+           whileInView={{ opacity: 1, scale: 1 }}
+           viewport={{ once: true }}
+        >
+           <div className="relative w-56 h-56 md:w-64 md:h-64 mb-10">
+              {/* Glowing ring behind image */}
+              <div className={`absolute inset-[-10px] rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 blur-xl opacity-30 transition-all duration-500 ${isEating ? 'opacity-80 scale-110' : ''}`} />
+              
+              <motion.div
+                animate={isEating ? { scale: [1, 1.15, 0.95, 1.05, 1], rotate: [0, -8, 8, -4, 0], y: [0, -15, 0] } : { y: [0, -8, 0] }}
+                transition={{ duration: isEating ? 0.8 : 4, repeat: isEating ? 0 : Infinity, ease: "easeInOut" }}
+                className="w-full h-full rounded-[2rem] md:rounded-full border border-white/20 bg-stone-900 overflow-hidden relative z-10 shadow-inner"
+              >
+                <img src="/n.png" className="w-full h-full object-cover scale-[1.3] translate-y-6 brightness-110" alt="Nello attende la pappina" />
+              </motion.div>
+              
+              {isEating && (
+                 <motion.div
+                   initial={{ opacity: 0, y: 0, scale: 0.5 }}
+                   animate={{ opacity: [0, 1, 0], y: -120, scale: 2 }}
+                   transition={{ duration: 1, ease: "easeOut" }}
+                   className="absolute top-1/4 left-1/2 -translate-x-1/2 text-5xl drop-shadow-[0_0_20px_rgba(255,165,0,0.8)] z-20"
+                 >
+                   🦴
+                 </motion.div>
+              )}
+           </div>
 
-      {/* Background decoration */}
-      <div className="absolute inset-0 pointer-events-none opacity-5 flex flex-wrap justify-around items-center p-12 overflow-hidden">
-         {Array.from({ length: 6 }).map((_, i) => (
-           <Bone key={i} className="w-48 h-48 text-stone-900" style={{ transform: `rotate(${i * 45}deg) translate(${i % 2 ? 100 : -100}px, ${i % 3 ? 50 : -50}px)` }} />
-         ))}
+           <div className="text-center w-full">
+             <div className="flex justify-between items-center mb-8 px-5 py-4 rounded-2xl bg-stone-950/60 border border-white/5 shadow-inner">
+                <span className="text-stone-400 font-mono text-sm uppercase tracking-widest font-semibold">Pappine Erogate</span>
+                <span className="text-3xl font-black text-amber-500 font-mono drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]">{feeds}</span>
+             </div>
+             
+             <button 
+               onClick={handleFeed}
+               disabled={isEating}
+               className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 disabled:opacity-50 disabled:grayscale px-8 py-5 rounded-2xl font-black text-xl md:text-2xl transition-all hover:shadow-[0_0_30px_rgba(245,158,11,0.5)] hover:scale-[1.03] active:scale-[0.98] flex items-center justify-center gap-3"
+             >
+               <Bone className={`w-6 h-6 ${isEating ? 'animate-spin' : ''}`} />
+               {isEating ? 'Gnam...' : 'Dai la Pappina'}
+             </button>
+           </div>
+        </motion.div>
       </div>
     </section>
   )
@@ -463,7 +487,7 @@ function MainApp() {
   });
 
   return (
-    <div className="bg-stone-50 text-stone-900 font-sans overflow-x-hidden selection:bg-amber-500 selection:text-stone-950">
+    <div className="bg-stone-50 text-stone-900 font-sans selection:bg-amber-500 selection:text-stone-950">
       {/* Progress bar */}
       <motion.div
         className="fixed top-0 left-0 right-0 h-1.5 bg-amber-500 origin-left z-50 rounded-r-full"
